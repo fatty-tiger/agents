@@ -2,7 +2,7 @@ import os
 # os.environ["OPENAI_API_KEY"] = "****"
 
 from typing import Annotated
-from typing import List
+from typing import List, Dict
 
 from langchain_community.chat_models.tongyi import ChatTongyi
 from typing_extensions import TypedDict
@@ -34,11 +34,37 @@ class State(TypedDict):
     messages: Annotated[list, add_messages]
     restaurant_list: List[str]
     exclude_list: List[str]
-
+    preference: Dict[str, str]
 
 
 def recmmend_node(state: State):
     """ 构建提示词进行推荐 """
+    if not state['restaurant_list']:
+        # calling tools
+        pass
+    
+    history_messages = state["messages"]
+    ret_messages = []
+    if not state['messages']:
+        # do greetings & recommend
+        ret_messages.append({"role": "asistant", "content": "hello!"})
+        prompt = """请从以下餐厅列表中给我推荐一个
+
+        # 日期：
+        # 时间：
+        # 节假日：
+
+        # 今日偏好：state["today_preference"]
+        # 历史偏好：state["history_preference"]
+
+        # 餐厅列表：
+        
+        """
+        history_messages.append({"role": "user", "content": prompt})
+        ret_messages.extend(llm.invoke(history_messages))
+        
+
+
     return {"messages": [llm.invoke( ["messages"])]}
 
 
