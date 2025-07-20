@@ -1,18 +1,23 @@
 import os
-os.environ["OPENAI_API_KEY"] = "****"
+# os.environ["OPENAI_API_KEY"] = "****"
 
 from typing import Annotated
 
 from langchain.chat_models import init_chat_model
+from langchain_community.llms import tongyi
 from typing_extensions import TypedDict
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 
 
-
 # llm = init_chat_model("openai:gpt-4o-mini-2024-07-18")
-llm = init_chat_model("openai:gpt-3.5-turbo")
+# llm = init_chat_model("openai:gpt-3.5-turbo")
+llm = tongyi.Tongyi(
+    model='qwen-plus',
+    streaming=True,
+    api_key=os.environ["BAILIAN_API_KEY"]
+)
 
 
 class State(TypedDict):
@@ -40,7 +45,11 @@ graph = graph_builder.compile()
 def stream_graph_updates(user_input: str):
     for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}):
         for value in event.values():
-            print("Assistant:", value["messages"][-1].content)
+            print(type(value))
+            print(type(value["messages"]))
+            print(value)
+            print("Assistant:", value["messages"][-1])
+            # print("Assistant:", value["messages"][-1]['content'])
 
 
 while True:
